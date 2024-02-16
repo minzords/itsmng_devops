@@ -69,8 +69,13 @@ Vagrant.configure("2") do |config|
   # documentation for more information about their specific syntax and use.
   config.vm.provision "shell", inline: <<-SHELL
     apt update
-    wget https://github.com/itsmng/itsm-ng/releases/download/v2.0.0_beta3/itsm-ng_2.0.0-beta3_all.deb
-    apt install -yf ./itsm-ng_2.0.0-beta3_all.deb
+    # Dev release
+    export VERSION=$(curl -s https://api.github.com/repos/itsmng/itsm-ng/releases | grep -Eo 'v[0-9]+\.[0-9]+\.[0-9]+(_[a-zA-Z0-9]+)?' | sed 's/^v//' | sort -V | tail -n 1)
+    # Stable
+    #export VERSION=$(curl -s https://api.github.com/repos/itsmng/itsm-ng/releases/latest | grep -Eo 'v[0-9]+\.[0-9]+\.[0-9]+(_[a-zA-Z0-9]+)?' | sed 's/^v//' | sort -V | tail -n 1)
+    wget https://github.com/itsmng/itsm-ng/releases/download/v${VERSION}/itsm-ng_${VERSION}_all.deb
+
+    apt install -yf ./itsm-ng_${VERSION}_all.deb
     a2dissite 000-default
     service apache2 restart
     mysql -u root -e "CREATE DATABASE itsm"
